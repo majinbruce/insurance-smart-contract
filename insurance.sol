@@ -234,15 +234,20 @@ contract insurance is OwnableUpgradeable, UUPSUpgradeable {
         returns (uint256)
     {
         uint256 priceOfpaymentCoin = uint256(
-            aggregator.getLatestPrice(priceFeed)
+            aggregator.getLatestPrice(priceFeed) * 1000
         );
+        console.log(priceOfpaymentCoin, "priceOfpaymentCoin");
         uint256 decimalsDenominator = uint256(
             10**aggregator.decimals(priceFeed)
         );
         uint256 usdValueOfPaymentCoins = priceOfpaymentCoin /
             decimalsDenominator;
+        console.log(_premium, "premium");
+        console.log(usdValueOfPaymentCoins, "usdValueOfPaymentCoins");
 
-        uint256 amount = _premium / usdValueOfPaymentCoins;
+        uint256 amount = _premium *1000 / usdValueOfPaymentCoins;
+        console.log(amount,"amount");
+
         return amount;
     }
 
