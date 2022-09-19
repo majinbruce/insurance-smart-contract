@@ -145,7 +145,6 @@ contract insurance is OwnableUpgradeable, UUPSUpgradeable {
 
     function buyInsurance(
         uint256 _paymentCoinID,
-        address _owner,
         address _nominee,
         uint256 _age,
         uint256 _insuredAmount,
@@ -198,7 +197,7 @@ contract insurance is OwnableUpgradeable, UUPSUpgradeable {
             address(this),
             amount
         );
-        emit insuranceBought(msgSender, _paymentCoinId, _insuredAmount);
+        emit insuranceBought(msgSender, _paymentCoinID, _insuredAmount);
     }
 
     function calculateRecoveryPercentage(uint256 age)
@@ -216,7 +215,7 @@ contract insurance is OwnableUpgradeable, UUPSUpgradeable {
         uint256 _age,
         uint256 _timePeriodInYears,
         uint256 _insuredAmount
-    ) internal pure returns (uint256) {
+    ) public pure returns (uint256) {
         uint256 recoveryPercentage = calculateRecoveryPercentage(_age);
         uint256 denominator = 100 * _timePeriodInYears * 365 days;
         uint256 premium = (_insuredAmount * recoveryPercentage * 30 days) /
@@ -267,7 +266,7 @@ contract insurance is OwnableUpgradeable, UUPSUpgradeable {
         emit nomineeUpdated(msgSender, _newNominee);
     }
 
-    function payPremium(uint256 _paymentCoinID, address _owner) external {
+    function payPremium(uint256 _paymentCoinID) external {
         address paymentCoinAddress = ListOfpaymentCoins[_paymentCoinID]
             .paymentCoinAddress;
 
@@ -310,9 +309,7 @@ contract insurance is OwnableUpgradeable, UUPSUpgradeable {
         ListOfInsuranceHolders[msgSender]
             .lastPremiumPaidTimeStamp = currentTimeStamp;
 
-        ListOfInsuranceHolders[msgSender].nextPremiumTimeStamp =
-            currentTimeStamp +
-            31 days;
+        ListOfInsuranceHolders[msgSender].nextPremiumTimeStamp += 31 days;
     }
 
     function claimInsurance(address owner, uint256 _paymentCoinID)
@@ -327,7 +324,7 @@ contract insurance is OwnableUpgradeable, UUPSUpgradeable {
             insuranceHolder.isInsured == true,
             "changeNominee: you are not insured"
         );
-        uint256 nominee = insuranceHolder.nominee;
+        address nominee = insuranceHolder.nominee;
         uint256 insuredAmount = insuranceHolder.insuredAmount;
 
         IERC20Upgradeable(paymentCoinAddress).safeTransferFrom(
@@ -338,8 +335,4 @@ contract insurance is OwnableUpgradeable, UUPSUpgradeable {
         ListOfInsuranceHolders[owner].isInsured = false;
         ListOfInsuranceHolders[owner].insuredAmount = 0;
     }
-
-    function terminateInsurance(address owner) external onlyOwner {}
-
-    function matureInsurance() external {}
 }
